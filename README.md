@@ -7,7 +7,7 @@
 
 안녕하세요 벌써 **배고파요**
 
-<img src="C:\projects\kks_test\images.jpg" alt="나를 대표하는 이미지" width="500" height="500">
+<img src="images.jpg" alt="나를 대표하는 이미지" width="200" height="200">
 
 # 프로젝트 주제
 
