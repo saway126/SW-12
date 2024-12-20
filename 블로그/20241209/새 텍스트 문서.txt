@@ -1,0 +1,47 @@
+{
+  "tables": [
+    {
+      "name": "User",
+      "columns": [
+        {"name": "user_id", "type": "INT", "primary_key": true},
+        {"name": "username", "type": "VARCHAR"},
+        {"name": "password", "type": "VARCHAR"},
+        {"name": "email", "type": "VARCHAR"},
+        {"name": "phone", "type": "VARCHAR"},
+        {"name": "created_at", "type": "TIMESTAMP"}
+      ]
+    },
+    {
+      "name": "Transaction",
+      "columns": [
+        {"name": "transaction_id", "type": "INT", "primary_key": true},
+        {"name": "user_id", "type": "INT", "foreign_key": "User.user_id"},
+        {"name": "action_type", "type": "VARCHAR"},
+        {"name": "action_timestamp", "type": "TIMESTAMP"}
+      ]
+    },
+    {
+      "name": "Product",
+      "columns": [
+        {"name": "product_id", "type": "INT", "primary_key": true},
+        {"name": "product_name", "type": "VARCHAR"},
+        {"name": "description", "type": "VARCHAR"},
+        {"name": "price", "type": "DECIMAL"}
+      ]
+    },
+    {
+      "name": "Order",
+      "columns": [
+        {"name": "order_id", "type": "INT", "primary_key": true},
+        {"name": "user_id", "type": "INT", "foreign_key": "User.user_id"},
+        {"name": "product_id", "type": "INT", "foreign_key": "Product.product_id"},
+        {"name": "order_date", "type": "TIMESTAMP"}
+      ]
+    }
+  ],
+  "relationships": [
+    {"from": "Transaction.user_id", "to": "User.user_id"},
+    {"from": "Order.user_id", "to": "User.user_id"},
+    {"from": "Order.product_id", "to": "Product.product_id"}
+  ]
+}

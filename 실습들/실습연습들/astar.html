@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <div class="grid">
+            <div class="cell">
+            </div>
+        </div>
+        <style>
+        .grid{
+            display: flex;
+            flex-wrap: wrap;
+            width: 300px;
+            height: 300px;
+        }
+        .cell{
+            display: flex;
+            width: 30px;
+            height: 30px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+        }
+
+        .start{
+            background-color: red;
+        }
+        .end{
+            background-color: green;
+        }
+        .wall{
+            background-color: black;
+        }
+    
+    </style>
+    </body>
+    <script>
+    let start = null;
+    let end = null;
+    
+    for(let i= 0; i<100; i++){
+        let gridDiv = document.querySelector(".grid");
+        const newDiv = document.createElement("div");
+        newDiv.classList.add("cell");
+        // newDiv에 data-row속성으로 행의 번호 추가
+        newDiv.setAttribute("data-row",Math.floor(i / 10));
+
+        // newDiv에 data-row속성으로 열의 번호 추가
+        newDiv.setAttribute("data-col",i % 10);
+    
+        //newDiv에 클릭 이벤트 추가
+        newDiv.addEventListener("click",() =>{
+            //클릭하면 console.log로 data-row 속성 및 data-col속성의 값 출력
+            console.log(newDiv.getAttribute("data-row"));
+            console.log(newDiv.getAttribute("data-col"));
+            //만약에 start가 null이면
+            if(start===null){
+                //  클릭한 div태그에 start 클래스 추가
+                newDiv.classList.add("start");
+                //  start 변수에 행 번호와 열 번호를 객체로 저장
+                start = { row, col };
+                console.log("Start set at:", start);
+            }
+            //그렇지 않고 만약에 end가 null이면
+            else if (end === null) {
+                // Set end cell
+                //  end 변수에 행 번호와 열 번호를 객체로 저장
+                newDiv.classList.add("end");
+                end = { row, col };
+                console.log("End set at:", end);
+            }
+            //그렇지 않으면
+            else {
+                // Set wall cell
+                //  클릭한 div태그에 wall 클래스를 추가
+                newDiv.classList.add("wall");
+
+              // Append the new cell to the grid
+            gridDiv.appendChild(newDiv);
+            }
+        });
+    }
+</script>
+</html>

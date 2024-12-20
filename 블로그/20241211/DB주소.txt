@@ -1,0 +1,231 @@
+DB주소
+
+192.0.4.152
+
+ID: kks
+PW: qwer12354
+
+슬레이브 아이디 3
+
+start slave;
+
+CHANGE MASTER TO
+		  MASTER_HOST='192.0.4.210',
+		  MASTER_USER='masterDB',
+		  MASTER_PASSWORD='qwer1234',
+		  MASTER_PORT=3306,
+		  MASTER_LOG_FILE='master1-bin.000002',
+		  MASTER_LOG_POS=344,
+		  MASTER_CONNECT_RETRY=10;
+
+
+CREATE USER 'exampleUser'@'localhost' IDENTIFIED BY 'password123';
+grant all privileges on quedoc.*  to 'kks'@'%';
+flush privileges;
+
+
+
+
+➡️ 마이페이지 버튼을 클릭하여 마이페이지 창으로 이동한다.
+➡️ 회원정보 수정 버튼을 누른다.
+➡️ 기존의 비밀번호를 입력하고 그 밑에 변경하고자 하는 정보를 입력하고 변경사항저장 버튼을 클릭한다.
+➡️ 변경하고자 하는 회원정보로 변경된다.
+
+
+UPDATE User
+SET 
+    password = '새로운비밀번호',      -- 변경할 비밀번호
+    nickname = '새로운닉네임',        -- 변경할 닉네임
+    email = '새로운이메일@example.com', -- 변경할 이메일
+    phoneNumber = '새로운번호',        -- 변경할 전화번호
+    address = '새로운주소'            -- 변경할 주소
+WHERE 
+    idx = 1                           -- 수정할 회원 번호
+    AND password = '기존비밀번호';     -- 기존 비밀번호 확인
+----------------------------------------------------------------------------
+
+ex)
+
+UPDATE User
+SET 
+    password = 'newPassword',
+    nickname = 'newNickname',
+    email = 'newEmail@example.com',
+    phoneNumber = '123-456-7890',
+    address = 'New Address'
+WHERE 
+    idx = 1
+    AND password = 'oldPassword';
+
+
+
+
+➡️ 회원 탈퇴 버튼을 누르고 비밀번호를 입력한다.
+➡️ 회원 탈퇴시 '기존에 있던 예약이나 관련 정보들이 모두 삭제된다.'라는 경고문을 보여준다.
+➡️ '탈퇴한다' 라는 문구를 입력하라는 창이 뜨고 '탈퇴한다'를 입력하면 회원 정보가 삭제된다. 
+
+
+DELETE FROM User
+WHERE 
+    idx = 1                -- 삭제할 회원 번호
+    AND password = '비밀번호'; -- 입력한 비밀번호가 일치하는 경우
+
+
+DELETE FROM Reservation WHERE userIdx = 1;
+DELETE FROM User WHERE idx = 1 AND password = '비밀번호';
+
+START TRANSACTION;
+
+-- 관련 데이터 삭제 (예: 예약 정보)
+DELETE FROM Reservation WHERE userIdx = 1;
+
+-- 회원 정보 삭제
+DELETE FROM User WHERE idx = 1 AND password = '비밀번호';
+
+COMMIT;
+
+
+
+
+➡️ 기업 등록 삭제 버튼을 누르고 비밀번호를 입력한다.
+➡️ 기업 등록 삭제시 '기존에 있던 예약이나 관련 정보들이 모두 삭제된다.'라는 경고문을 보여준다.
+➡️ '삭제한다' 라는 문구를 입력하라는 창이 뜨고 '삭제한다'를 입력하면 회원 정보가 삭제된다. 
+
+
+manager(관리자)
+관리자번호	idx			int _auto_increment
+아이디	userID			varchar
+이메일	email			varchar
+번호		phoneNumber	varchar 에 대한 쿼리문을 작성해줘
+
+
+UPDATE Manager
+SET 
+    email = '새로운이메일@example.com',    -- 변경할 이메일
+    phoneNumber = '123-456-7890'            -- 변경할 전화번호
+WHERE 
+    idx = 1                                 -- 수정할 관리자 번호
+    AND userID = 'adminUserID';             -- 관리자 아이디로 검증
+
+
+ex)
+
+START TRANSACTION;
+
+-- 기존 비밀번호 확인 후 업데이트
+UPDATE Manager
+SET 
+    email = 'updated_email@example.com',
+    phoneNumber = '987-654-3210'
+WHERE 
+    idx = 1
+    AND userID = 'adminUserID';
+
+COMMIT;
+
+
+
+
+➡️ 기업 등록 삭제 버튼을 누르고 비밀번호를 입력한다.
+➡️ 기업 등록 삭제시 '기존에 있던 예약이나 관련 정보들이 모두 삭제된다.'라는 경고문을 보여준다.
+➡️ '삭제한다' 라는 문구를 입력하라는 창이 뜨고 '삭제한다'를 입력하면 회원 정보가 삭제된다. 
+
+
+관리자 정보 삭제 쿼리
+
+DELETE FROM Manager
+WHERE 
+    idx = 1                                 -- 삭제할 관리자 번호
+    AND userID = 'adminUserID';             -- 관리자 아이디로 검증
+
+
+
+관련 데이터 삭제
+
+START TRANSACTION;
+
+-- 관련 예약 데이터 삭제
+DELETE FROM Reservation WHERE managerIdx = 1;
+
+-- 관리자 정보 삭제
+DELETE FROM Manager WHERE idx = 1 AND userID = 'adminUserID';
+
+COMMIT;
+
+관리자 정보 삭제 예제
+
+START TRANSACTION;
+
+-- 관련 데이터 삭제
+DELETE FROM Reservation WHERE managerIdx = 2;
+
+-- 관리자 정보 삭제
+DELETE FROM Manager WHERE idx = 2 AND userID = 'exampleAdmin';
+
+COMMIT;
+
+
+
+주의사항
+외래 키 사용: 예약 데이터와 관리자 데이터를 연결하는 테이블에 외래 키 제약 조건을 설정하면 자동 삭제가 가능합니다.
+
+ALTER TABLE Reservation
+ADD CONSTRAINT fk_manager
+FOREIGN KEY (managerIdx) REFERENCES Manager(idx)
+ON DELETE CASCADE;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

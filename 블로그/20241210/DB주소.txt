@@ -1,0 +1,95 @@
+DB주소
+
+192.0.4.152
+
+ID: kks
+PW: qwer12354
+
+슬레이브 아이디 3
+
+start slave;
+
+CHANGE MASTER TO
+		  MASTER_HOST='192.0.4.211',
+		  MASTER_USER='masterDB',
+		  MASTER_PASSWORD='qwer1234',
+		  MASTER_PORT=3306,
+		  MASTER_LOG_FILE='master1-bin.000003',
+		  MASTER_LOG_POS=344,
+		  MASTER_CONNECT_RETRY=10;
+
+
+CREATE USER 'kks'@'%' IDENTIFIED BY 'password1234';
+MariaDB [(none)]> grant select on QUEDOC.* to 'kks'@'%';
+flush privileges;
+
+
+해야할 일
+잘 작동하는지, 시간 얼마나 소요되는지 체크
+쿼리 수정이나 index 같은 SQL 최적화 방법으로 시간 단축시켜보기
+진행과정 전부 캡쳐
+
+예약 시간의 1시간의 전에 예약(진료)를 조회함
+1시간이 남았다는 알람팝업창을 띄움
+
+
+
+
+예약 확정 알림		hospital_1		결제를 완료한다면 '예약이 확정되었습니다.' 라고 팝업창이 뜬다.							
+							
+							
+예약 취소 알림		hospital_1		예약조회를 선택하여 취소하고 정상적으로 취소가 되었으면 취소가 되었다고는 팝업창을 띄움				
+							
+							
+							예약조회를 선택하여 변경하고 싶은 예약을 변경한 뒤 정상적으로 변경이 되었으면 변경이 되었다고는 팝업창을 띄움
+예약 변경 알림		hospital_1					
+							
+							
+							
+예약 시간 알림		hospital_1		예약 시간의 1시간의 전에 예약(진료)까지 1시간이 남았다는 알람팝업창을 띄움				
+							
+							
+							
+
+pdf 잘라서 이미지로 가지고 있기
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

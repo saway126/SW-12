@@ -1,0 +1,132 @@
+﻿3계층 아키텍처 + 다중화
+
+1. nginx
+  1) 설치
+	apt update
+	apt install -y nginx
+
+  2) 설정
+	vi /etc/nginx/sites-enabled/default
+upstream tomcat_backend {
+        server 10.10.10.20:8080;
+        server 10.10.10.30:8080;
+}
+
+server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+
+        root /var/www/html;
+
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name _;
+
+        location / {
+                try_files $uri $uri/ =404;
+        }
+
+
+        location /api {
+            rewrite ^/api(/.*)$ $1 break;
+            proxy_pass http://tomcat_backend;  # 업스트림 그룹으로 프록시
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+}
+
+  3) html 파일 다운 및 압축 해제
+	cd /var/www/html
+	rm -rf ./*
+	wget http://183.109.119.198:10000/1.doc/03.%20%eb%8d%b0%ec%9d%b4%ed%84%b0%eb%b2%a0%ec%9d%b4%ec%8a%a4/html.tar.gz
+	tar zxvf html.tar.gz
+
+
+2. tomcat
+  1) 자바 설치
+	apt update
+	apt install -y openjdk-17-jdk
+
+  2) 톰캣 다운로드
+	wget https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.33/bin/apache-tomcat-10.1.33.tar.gz
+
+  3) 톰캣 압축 해제
+	tar zxvf apache-tomcat-10.1.33.tar.gz
+
+  4) 폴더 이동
+	mv apache-tomcat-10.1.33 /usr/local/tomcat10
+
+  5) JSP 코드 파일 생성
+	rm -rf /usr/local/tomcat10/webapps/ROOT/*
+
+	vi /usr/local/tomcat10/webapps/ROOT/db.jsp
+<%@ page import="java.sql.*" %>
+<%
+    String dbURL = "jdbc:mariadb://192.168.1111.11:3306/web";
+    String dbUser = "kks";
+    String dbPassword = "qwer1234";
+    Connection conn = null;
+    try {
+        Class.forName("org.mariadb.jdbc.Driver");
+        conn = DriverManager.getConnection(dbURL, dbUser, dbPassword);
+        System.out.println("DB success!");
+    } catch (Exception e) {
+        e.printStackTrace();
+        response.setContentType("text/html;charset=UTF-8");
+        out.println("DB failed!");
+    }
+%>
+
+
+  6) 라이브러리 다운
+	cd /usr/local/tomcat10/lib
+	wget http://192.0.0.100:10000/mariadb%2djava%2dclient%2d3.3.3.jar
+
+  7) 톰캣 실행
+	/usr/local/tomcat10/bin/shutdown.sh
+	/usr/local/tomcat10/bin/startup.sh
+
+  8) 톰캣 실행 확인
+	ps -ef | grep /usr/bin/java
+	netstat -anlp | grep :8080
+
+  9) jsp 파일  다운 및 압축 해제
+	cd /usr/local/tomcat10/webapps/ROOT
+
+	wget http://192.0.0.100:10000/1.doc/03.%20%eb%8d%b0%ec%9d%b4%ed%84%b0%eb%b2%a0%ec%9d%b4%ec%8a%a4/jsp.tar.gz
+	
+tar zxvf jsp.tar.gz
+
+
+3. haproxy
+
+4. mariadb
+	web 이름의 DB 생성
+
+테이블 생성
+-- 사용자 테이블
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+
+-- 게시판 테이블
+CREATE TABLE posts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id INT,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+
+
+
+
+
+
+

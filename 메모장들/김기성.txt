@@ -1,0 +1,228 @@
+﻿01. ERD를 보고 CREATE 문을 이용해서 테이블을 생성하시오										10점
+02. front.html로 접속하면 '이니셜 front server'라고 나와야 함(파일 직접 생성)                						10점
+03. /api/back.jsp로 접속하면 새로고침 눌렀을 때 서버 IP가 번갈아가면서 나와야 함(코드는 밑에)		 		20점	1개만 나오면 10점
+04. 강사 컴퓨터에서 접속할 수 있도록 설정하시오                              								10점
+05. www로 시작하는 도메인 주소로 강사 컴퓨터에서 접속할 수 있도록 설정하시오                     				10점
+
+06. /api/insert.jsp 파일에 알맞은 SQL을 작성하하고 nginx 서버의 /insert.html로 접속해서 테스트				20점
+07. /api/select.jsp 파일에 알맞은 SQL을 작성하시오	nginx 서버의 /api/select.jsp로 접속해서 테스트				20점
+단, 06~07. insert.jsp는 master 서버로 연결되게 하고 select.jsp는 slave 서버로 연결되게 설정하시오(코드는 밑에)	
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+		insert.html
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save Course, Section, Lecture</title>
+</head>
+<body>
+    <h1>Save Data</h1>
+
+    <!-- 코스 저장 폼 -->
+    <h2>Save Course</h2>
+    <form action="/api/insert.jsp" method="post">
+		<label for="course_id">Course ID:</label>
+        <input type="number" id="course_id" name="course_id" required>
+        <input type="hidden" name="action" value="course">
+        <label for="course_name">Course Name:</label>
+        <input type="text" id="course_name" name="course_name" required>
+        <button type="submit">Save Course</button>
+    </form>
+
+    <hr>
+
+    <!-- 섹션 저장 폼 -->
+    <h2>Save Section</h2>
+    <form action="/api/insert.jsp" method="post">
+		<label for="section_id">Section ID:</label>
+		<input type="number" id="section_id" name="section_id" required>
+        <input type="hidden" name="action" value="section">
+        <label for="section_name">Section Name:</label>
+        <input type="text" id="section_name" name="section_name" required>
+        <br>
+        <label for="course_id">Course ID:</label>
+        <input type="number" id="course_id" name="course_id" required>
+        <button type="submit">Save Section</button>
+    </form>
+
+    <hr>
+
+    <!-- 강의 저장 폼 -->
+    <h2>Save Lecture</h2>
+    <form action="/api/insert.jsp" method="post">
+        <input type="hidden" name="action" value="lecture">
+        <label for="lecture_name">Lecture Name:</label>
+        <input type="text" id="lecture_name" name="lecture_name" required>
+        <br>
+        <label for="section_id">Section ID:</label>
+        <input type="number" id="section_id" name="section_id" required>
+        <button type="submit">Save Lecture</button>
+    </form>
+</body>
+</html>
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+		insert.jsp
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+<%@ page import="java.sql.*" %>
+<%
+    // 데이터베이스 연결 정보
+    String dbURL = "192.168.111.131:3306";
+    String dbUser = "kks";
+    String dbPassword = "qwer1234";
+
+    Connection conn = null;
+
+    try {
+        Class.forName("org.mariadb.jdbc.Driver");
+        conn = DriverManager.getConnection(dbURL, dbUser, dbPassword);
+
+        // 요청에서 파라미터 추출
+        String action = request.getParameter("action"); // "course", "section", "lecture"
+
+        if ("course".equals(action)) {
+            // 코스 저장
+            int courseId = Integer.parseInt(request.getParameter("course_id"));
+            String courseName = request.getParameter("course_name");
+
+            String query = "SELECT course_id, course_name,section_name, lecture_id, lecture_name
+FROM courses
+LEFT JOIN sections
+ON sections.id
+LEFT JOIN lectures
+ON lectures.id
+";
+
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+				stmt.setInt(1, courseId);
+                stmt.setString(2, courseName);
+                stmt.executeUpdate();
+                out.println("<p>Course saved successfully!</p>");
+            }
+        } else if ("section".equals(action)) {
+            // 섹션 저장
+            int sectionId = Integer.parseInt(request.getParameter("section_id"));
+            String sectionName = request.getParameter("section_name");
+            int courseId = Integer.parseInt(request.getParameter("course_id"));
+
+            String query = "SELECT course_id, course_name,section_name, lecture_id, lecture_name
+FROM courses
+LEFT JOIN sections
+ON sections.id
+LEFT JOIN lectures
+ON lectures.id
+";
+
+
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setInt(1, sectionId);
+                stmt.setString(2, sectionName);
+                stmt.setInt(3, courseId);
+                stmt.executeUpdate();
+                out.println("<p>Section saved successfully!</p>");
+            }
+        } else if ("lecture".equals(action)) {
+            // 강의 저장
+            String lectureName = request.getParameter("lecture_name");
+            int sectionId = Integer.parseInt(request.getParameter("section_id"));
+
+            String query = "SELECT course_id, course_name,section_name, lecture_id, lecture_name
+FROM courses
+LEFT JOIN sections
+ON sections.id
+LEFT JOIN lectures
+ON lectures.id
+";
+
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, lectureName);
+                stmt.setInt(2, sectionId);
+                stmt.executeUpdate();
+                out.println("<p>Lecture saved successfully!</p>");
+            }
+        } else {
+            out.println("<p>Invalid action!</p>");
+        }
+    } catch (Exception e) {
+        out.println("Error: " + e.getMessage());
+    } finally {
+        if (conn != null) try { conn.close(); } catch (SQLException e) {}
+    }
+%>
+<a href="/insert.html">Back to Form</a>
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+		select.jsp
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+<%@ page import="java.sql.*" %>
+<%
+    String dbURL = "192.168.111.131";
+    String dbUser = "kks";
+    String dbPassword = "qwer1234";
+    Connection conn = null;
+
+    try {
+        Class.forName("org.mariadb.jdbc.Driver");
+        conn = DriverManager.getConnection(dbURL, dbUser, dbPassword);
+
+	// 밑에 "" 안에 SQL을 한 줄로 작성
+        String sql = "????????????????????";
+
+        PreparedStatement stmt = conn.prepareStatement(sql);
+        ResultSet rs = stmt.executeQuery();
+
+        int currentCourseId = -1;
+        int currentSectionId = -1;
+
+        while (rs.next()) {
+            int courseId = rs.getInt("course_id");
+            String courseName = rs.getString("course_name");
+            int sectionId = rs.getInt("section_id");
+            String sectionName = rs.getString("section_name");
+            String lectureName = rs.getString("lecture_name");
+
+            // 코스 변경 시 출력
+            if (courseId != currentCourseId) {
+                if (currentCourseId != -1) out.println("</ul></ul>"); // 이전 코스 닫기
+                currentCourseId = courseId;
+                out.println("<h2>Course: " + courseName + "</h2>");
+                out.println("<ul>");
+                currentSectionId = -1; // 섹션 초기화
+            }
+
+            // 섹션 변경 시 출력
+            if (sectionId != currentSectionId) {
+                if (currentSectionId != -1) out.println("</ul>"); // 이전 섹션 닫기
+                currentSectionId = sectionId;
+                if (sectionName != null) {
+                    out.println("<li><strong>Section: " + sectionName + "</strong>");
+                    out.println("<ul>");
+                }
+            }
+
+            // 강의 출력
+            if (lectureName != null) {
+                out.println("<li>" + lectureName + "</li>");
+            }
+        }
+
+        // 마지막 코스 및 섹션 닫기
+        if (currentCourseId != -1) out.println("</ul></ul>");
+
+        rs.close();
+        stmt.close();
+    } catch (Exception e) {
+        out.println("Error: " + e.getMessage());
+    } finally {
+        if (conn != null) try { conn.close(); } catch (SQLException e) {}
+    }
+%>

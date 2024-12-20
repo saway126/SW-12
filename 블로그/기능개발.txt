@@ -1,0 +1,36 @@
+import java.util.*;
+
+class Solution {
+    public int[] solution(int[] progresses, int[] speeds) {
+        int day = 0;
+        int[] answer = {};
+        Deque<Integer> q = new ArrayDeque();
+        
+        for(int i = 0;i < progresses.length;i++) {   //작업완료되는 날짜를 큐에 저장
+            if((100-progresses[i]) % speeds[i] != 0)
+                q.add((100-progresses[i])/speeds[i]+1);  
+            else
+                q.add((100-progresses[i])/speeds[i]);
+        }
+        while(!q.isEmpty()) {
+            int sum = 0;
+            if(q.peek() >= day) { // 작업완료되는 날짜가 현재날짜보다 많을 때
+                day = q.poll();
+                sum++;
+                while(!q.isEmpty()) {   // 방금 작업완료된 날짜보다 빨리 끝난애들 꺼냄
+                    if(q.peek() <= day) {
+                        q.poll();
+                        sum++;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            int l = answer.length;  //  어레이 늘려서 저장
+            answer = Arrays.copyOf(answer,l+1);
+            answer[l] = sum;
+            
+        }        
+        return answer;
+    }
+}

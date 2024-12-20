@@ -1,0 +1,106 @@
+마스터: 192.168.111.131
+슬레이브: 192.168.111.132
+
+
+미러화
+
+7) Master 지정
+	mariadb -u root -p
+		CHANGE MASTER TO
+		  MASTER_HOST='192.168.111.132',
+		  MASTER_USER='slave_user',
+		  MASTER_PASSWORD='qwer1234',
+		  MASTER_PORT=3306,
+		  MASTER_LOG_FILE='master1-bin.000002',
+		  MASTER_LOG_POS=344,
+		  MASTER_CONNECT_RETRY=10;
+
+
+		START SLAVE;
+
+내가 무엇을 하고 있는지 생각하고 움직여라
+
+1. Master
+  1) 기존 서버 사용
+  2) master 설정/슬레이브설정(미러사이트)
+	vi /etc/mysql/mariadb.conf.d/50-server.cnf
+		[mariadb]	<- 이거는 추가하는거 아님
+		log-bin
+		server_id=1(서버마다 다르기만 하면 되는거니까 아무거나 상관 없다 대신 기억해라)
+		log-basename=master1(이거도 바꿔야 하는거라 했나?)
+		binlog-format=mixed	
+
+	systemctl restart mariadb
+
+  3) master 확인
+	mariadb -u root -p
+		show master status;
+
+  4) master (슬레이브설정(미러사이트)
+)서버에 사용자 추가 및 권한 설정
+	CREATE USER 'slave_user'@'%' IDENTIFIED BY 'qwer1234';
+	GRANT REPLICATION SLAVE ON *.* TO 'slave_user'@'%';
+	FLUSH PRIVILEGES;
+
+2. Slave
+  1) DB 서버 설정
+	vi /etc/mysql/mariadb.conf.d/50-server.cnf
+		[mariadb]	<- 이거는 추가하는거 아님
+		server_id=2
+
+
+	systemctl restart mariadb
+
+  7) Master 지정
+	mariadb -u root -p
+		CHANGE MASTER TO
+		  MASTER_HOST='[192.168.111.131]',
+		  MASTER_USER='slave_user',
+		  MASTER_PASSWORD='qwer1234',
+		  MASTER_PORT=3306,
+		  MASTER_LOG_FILE='[master1-bin.000001]',
+		  MASTER_LOG_POS=[330],
+		  MASTER_CONNECT_RETRY=10;
+
+
+		START SLAVE;
+
+		
+  8) Slave 확인
+	SHOW SLAVE STATUS\G
+		Slave_IO_Running: Yes	
+		Slave_SQL_Running: Yes
+
+
+
+슬레이브 멈추게 하는 것
+stop slave\g
+
+
+  1) Mirror Site(미러 사이트)  
+	주 센터와 동일한 수준의 데이터와 시스템을 원격지에 구축하고 Active 상태로 실시간 동시 서비스를 제공하는 방식 
+
+keepalived DB
+
+
+
+
+
+pidof mariadb 현재 상황 보여줌
+
+
+mariadbd 서버 프로그램
+
+스테이트가 백업
+
+아이피는 서로 반대로
+우선순위 마스터를 102로
+슬레이브를 101로
+둘이 같은 아이피로 해줘야 한다.
+
+
+
+
+
+
+

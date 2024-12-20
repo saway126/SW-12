@@ -1,0 +1,18 @@
+server 
+data import
+
+TCP 상태 전이도
+
+서버개발을 하다보면 리스닝 상태여도 접속이 x
+ESTABLISHED가 되었냐 안되었냐
+
+3Way-handshake
+
+ 서버가 연결이 되어있는건데 안되면 서버문제
+
+판단
+
+netstate
+넷스텍??
+
+ano  | netplan :3306

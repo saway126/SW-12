@@ -1,0 +1,32 @@
+﻿1. Jmeter 설정
+  1) 다운 및 압축 해제
+
+  2) 실행
+	압축 푼 폴더\bin\jmeter.bat
+
+  3) DB 컨넥터 추가
+	mariadb-java-client-3.3.3.jar 파일 다운하고 jmeter 압축 푼 곳\lib 폴더로 옮기기
+
+  4) 설정
+	Test Plan 우클릭 -> Add -> Threads -> Thread Group
+		Number of Thread : 접속자 수				100
+		Ramp-up period : 접속자가 접속하는 시간		1
+		Loop Count : 반복 횟수					1
+
+	Thread Group 우클릭 -> Add -> Config Element -> JDBC Connection Configuration 
+		Variable Name for created pool : dbpool
+		Validation Query : select 1
+		Database URL : jdbc:mariadb://192.168.111.129:3306/root
+		JDBC Driver class : org.mariadb.jdbc.Driver
+		Username : DB 서버에 접속할 ID
+		Password : DB 서버에 접속할 PW
+
+	Thread Group 우클릭 -> Add -> Sampler -> JDBC Request
+		Variable Name of Pool declared in JDBC Connection Configuration : dbpool
+		Query Type : Select Statement
+		Query : SELECT * FROM member;
+
+	Test Plan 우클릭 -> Listener -> View Result Tree
+
+	Test Plan 우클릭 -> Listener -> Summary Report
+

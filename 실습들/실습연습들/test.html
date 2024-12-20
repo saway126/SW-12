@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <div class="grid">
+            <div class="cell">
+            </div>
+        </div>
+        <style>
+        .grid{
+            display: flex;
+            flex-wrap: wrap;
+            width: 300px;
+            height: 300px;
+        }
+        .cell{
+            display: flex;
+            width: 30px;
+            height: 30px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+        }
+
+        .start{
+            background-color: red;
+        }
+        .end{
+            background-color: green;
+        }
+        .wall{
+            background-color: black;
+        }
+    
+    </style>
+        <script>
+            let start = null;
+            let end = null;
+        
+            for (let i = 0; i < 100; i++) {
+                let gridDiv = document.querySelector(".grid");
+                const newDiv = document.createElement("div");
+                newDiv.classList.add("cell");
+        
+                // Add row and column attributes
+                newDiv.setAttribute("data-row", Math.floor(i / 10));
+                newDiv.setAttribute("data-col", i % 10);
+        
+                // Add click event to each cell
+                newDiv.addEventListener("click", () => {
+                    const row = newDiv.getAttribute("data-row");
+                    const col = newDiv.getAttribute("data-col");
+        
+                    if (start === null) {
+                        // Set start cell
+                        newDiv.classList.add("start");
+                        start = { row, col };
+                        console.log("Start set at:", start);
+                    } else if (end === null) {
+                        // Set end cell
+                        newDiv.classList.add("end");
+                        end = { row, col };
+                        console.log("End set at:", end);
+                    } else {
+                        // Set wall cell
+                        newDiv.classList.add("wall");
+                        console.log(`Wall added at: (${row}, ${col})`);
+                    }
+        
+                    // Log clicked cell's data
+                    console.log(`Row: ${row}, Col: ${col}`);
+                });
+        
+                // Append the new cell to the grid
+                gridDiv.appendChild(newDiv);
+            }
+        </script>
+    </body>
+

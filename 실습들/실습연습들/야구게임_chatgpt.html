@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+//    스트라이크 수를 저장할 변수 생성
+//    볼 수를 저장할 변수 생성
+//    아웃 수를 저장할 변수 생성
+let out;
+let ball;
+let strike;
+//    랜덤한 수의 3자리 수 중 중복된 숫자가 있으면 다시 생성
+        // 0부터 3번반복(1)
+        for(let i=0; i<3; i++){
+             //랜덤한 숫자를 저장할 변수 생성
+             let num=0;
+            //랜덤한 숫자 생성해서 변수에 저장
+            num=Math.floor(Math.random() * 9);
+            //로또 번호를 저장하는 변수의 현재 반복 횟수 번째에 생성한 랜덤 숫자 저장
+            rannum[i]=num;
+            //0부터 현재 반복 횟수만큼 반복(2)
+            for(let j=0; j<i; j++){
+                //만약에 (1)의 반복횟수 번째의 배열의 값이랑(2)의 반복횟수번째의 배열의 값
+                if(rannum[i]==rannum[j]){
+                    //(1)의 반복횟수를 1 감소
+                    i--;
+                }
+            }
+        }
+        console.log(rannum); // 결과 출력(디버깅)
+
+//3자리 수 생성(100의 자리수)
+let a=123;
+    //각 자리는 0~9까지 중복없이 생성
+    //3개를 저장할 변수 생성
+    let rannum;
+        //변수에 0 3개가 있는 배열 저장
+        rannum=[0,0,0];
+    let play=0;
+//    스트라이크 수가 3이 아니면 계속 반복
+for(strike; strike<3; strike++){
+    //        반복한 수 1 증가
+    play++;
+    console.log(play);
+//        스트라이크 수에 0 저장
+    strike=0;
+//        볼 수에 0 저장
+    ball=0;
+//        숫자를 하나 입력받아서 변수에 저장
+let input;
+    
+   input = prompt();
+   typeof input   // 글자로 저장됨
+   
+    input=Number(input);
+//        만약에 랜덤한 수랑 입력한 수의 숫자와 자리가 일치하면 s를 1증가, 숫자는 일치하는데 자리가 다르면 b 1 증가
+//        아웃 수에 3 - 스크라이트 수 - 볼 수 를 저장
+
+
+//    반복한 수 출력
+
+}
+    </script>
+</body>
+</html>
+​

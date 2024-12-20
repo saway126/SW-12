@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<!-- saved from url=(0060)http://183.109.119.198:10000/1.doc/06.%20JS/day04/login.html -->
+<html lang="en" data-lt-installed="true"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <input type="text" id="username">
+    <input type="password" id="password">
+    <button id="loginBtn">로그인</button>
+    <script src="./Document_files/axios.min.js.다운로드"></script>
+    <script>
+        const login = () => {
+            console.log("test");
+            const username = document.querySelector("#username").value;
+            const password = document.querySelector("#password").value;
+
+
+            axios
+                .post('http://localhost:8080/login', {
+                    username: username,
+                    password: password
+                }, { headers: { "Content-Type": "application/json" } })
+                .then((response) => {
+                    console.log('POST Response:', response.data);
+                })
+                .catch((error) => { console.error('Error:', error); });
+        }
+
+        const loginBtn = document.querySelector("#loginBtn");
+        loginBtn.addEventListener("click", login);
+    </script>
+
+
+
+
+</body></html>

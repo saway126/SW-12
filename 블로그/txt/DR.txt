@@ -1,0 +1,203 @@
+﻿1. 재해 복구(DR)
+  1) Mirror Site(미러 사이트)  
+	주 센터와 동일한 수준의 데이터와 시스템을 원격지에 구축하고 Active 상태로 실시간 동시 서비스를 제공하는 방식 
+
+  2) Hot Site(핫 사이트)  
+	주 센터와 동일한 수준의 데이터와 시스템을 원격지에 구축하여 Stand-by 상태로 유지하며 재난 발생시 Active 상태로 전환하여 서비스 제공
+
+  3) Warm Site(웜 사이트) 
+	데이터만 원격지에 보관하고 서비스를 위한 시스템은 확보하지 않거나 최소한으로만 구성하고 재난 발생시에 필요한 시스템을 구성하여 복구
+
+  4) Cold Site( 콜드 사이트) 
+	최소한의 준비만 해두는 것
+
+
+2. DB 서버 미러 사이트 구성해보기
+	HAProxy	DB1(Mater, Slave, Active), DB2(Slave, Master, Active)
+
+
+3. DB 서버 핫 사이트 구성해보기
+	Keepalived	DB1(Mater, Active), DB2(Slave, Standby)
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+남의 컴퓨터에 있는 파일을 내 컴퓨터 받을 때
+	scp  test@10.10.10.12:/home/test/backup.sql  ./
+
+내 컴퓨터에 있는 파일을 남의 컴퓨터에 보낼 때
+	scp  ./backup.sql   test@10.10.10.12:/home/test/
+
+
+
+기존 데이터를 양쪽 똑같게 설정
+
+	DB 데이터 백업
+		mysqldump -u root -p --all-databases > backup.sql
+
+	DB 데이터 복구
+		mysql -u root -p < backup.sql
+
+
+
+DB 서버 Replication 설정(Master, Slave)
+
+1. Master
+  1) 기존 서버 사용
+  2) master 설정
+	vi /etc/mysql/mariadb.conf.d/50-server.cnf
+		[mariadb]	<- 이거는 추가하는거 아님
+		log-bin
+		server_id=1
+		log-basename=master1
+		binlog-format=mixed	
+
+	systemctl restart mariadb
+
+  3) master 확인
+	mariadb -u root -p
+		show master status;
+
+  4) master 서버에 사용자 추가 및 권한 설정
+	CREATE USER 'slave_user'@'%' IDENTIFIED BY 'qwer1234';
+	GRANT REPLICATION SLAVE ON *.* TO 'slave_user'@'%';
+	FLUSH PRIVILEGES;
+
+2. Slave
+  1) DB 서버 설정
+	vi /etc/mysql/mariadb.conf.d/50-server.cnf
+		[mariadb]	<- 이거는 추가하는거 아님
+		server_id=2
+
+
+	systemctl restart mariadb
+
+  7) Master 지정
+	mariadb -u root -p
+		CHANGE MASTER TO
+		  MASTER_HOST=192.0.4.152',
+		  MASTER_PASSWORD='qwer1234',
+		  MASTER_PORT=3306,
+		  MASTER_LOG_FILE='[마스터에서 show master status 했을 때 File 이름]',
+		  MASTER_LOG_POS=[마스터에서 show master status 했을 때 position 번호],
+		  MASTER_CONNECT_RETRY=10;
+
+		  MASTER_USER='slave_user',
+
+		START SLAVE;
+
+		
+  8) Slave 확인
+	SHOW SLAVE STATUS\G
+		Slave_IO_Running: Yes	
+		Slave_SQL_Running: Yes
+
+--------------------------------------------------------------------------------------------------------------
+		설정이 잘 못됐을 때
+--------------------------------------------------------------------------------------------------------------
+
+  1) 슬레이브 중지
+	STOP SLAVE;
+	RESET SLAVE;
+
+  2) 데이터 백업 및 복구
+
+
+  3) Master 지정
+	CHANGE MASTER TO
+	  MASTER_HOST='[Master 서버 IP]',
+	  MASTER_USER='slave_user',
+	  MASTER_PASSWORD='qwer1234',
+	  MASTER_PORT=3306,
+	  MASTER_LOG_FILE='[마스터에서 show master status 했을 때 File 이름]',
+	  MASTER_LOG_POS=[마스터에서 show master status 했을 때 position 번호],
+	  MASTER_CONNECT_RETRY=10;
+
+
+	START SLAVE;
+
+
+---------------------------------------------------------------------------------------------
+1. 마스터(Active) 설정
+  1) keepalived 설치
+	apt install -y keepalived
+
+  2) keepalived 설정파일 생성
+	 vi /etc/keepalived/keepalived.conf
+
+global_defs {
+    router_id node01
+    enable_script_security
+    script_user root
+}
+
+vrrp_script track_mariadb {
+    script "systemctl is-active mariadb"
+    interval 5
+    fall 4
+    rise 2
+}
+
+vrrp_instance VRRP1 {
+    state MASTER
+    interface ens33
+    virtual_router_id 101
+    priority 200
+    advert_int 1
+    virtual_ipaddress {
+        10.10.10.200/24
+    }
+
+    track_script {
+        track_mariadb 
+    }
+}
+
+
+
+
+2. 슬레이브(Standby) 설정
+  1) keepalived 설치
+	apt install -y keepalived
+
+
+  2) keepalived 설정파일 생성
+	 vi /etc/keepalived/keepalived.conf
+
+global_defs {
+    router_id node02
+    enable_script_security
+    script_user root
+}
+
+vrrp_script track_mariadb {
+    script "systemctl is-active mariadb"
+    interval 5
+    fall 4
+    rise 2
+}
+
+vrrp_instance VRRP1 {
+    state BACKUP
+    interface ens33
+    virtual_router_id 101
+    priority 100
+    advert_int 1
+    virtual_ipaddress {
+        10.10.10.200/24
+    }
+
+    track_script {
+        track_mariadb
+    }
+}
+
+
+
+
+tail -f logs/..
+
+

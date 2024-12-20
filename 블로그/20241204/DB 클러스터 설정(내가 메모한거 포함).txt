@@ -1,0 +1,104 @@
+﻿1. DB 설치 및 초기 설정 (3대 모두 똑같이)
+  1) 설치
+	apt update
+	apt install -y mariadb-server
+
+  2) mariadb 바인드 주소 설정
+	vi /etc/mysql/mariadb.conf.d/50-server.cnf
+	27번 라인에 있는 설정을 다음처럼 변경
+	bind-address            = 0.0.0.0
+
+  3) mariadb 실행
+	systemctl restart mariadb
+
+  4) mariadb 실행 확인
+	systemctl status mariadb
+	apt install -y net-tools
+	netstat -anlp | grep :3306	
+
+  5) DB 서버 초기화
+	 mysql_secure_installation
+		엔터
+		엔터
+		엔터
+		qwer1234
+		qwer1234
+		엔터
+		엔터
+		엔터
+		엔터
+
+
+2. 클러스터 설정
+  1) 서버 중지
+	systemctl stop mariadb
+
+  2) 설정 추가(3대 중 1대만 먼저 설정)
+	vi /etc/mysql/mariadb.conf.d/50-server.cnf
+	마지막 줄에 다음 내용 추가
+[galera]
+wsrep_on=ON
+wsrep_provider=/usr/lib/galera/libgalera_smm.so
+wsrep_cluster_address="gcomm://"
+binlog_format=row
+default_storage_engine=InnoDB
+innodb_autoinc_lock_mode=2
+bind-address=0.0.0.0
+wsrep_cluster_name="MariaDB_Cluster"	# 3대의 컴퓨터를 묶었을 때 내가 지어줄 이름
+wsrep_node_address="10.10.10.101"	# 현재 컴퓨터의 IP 주소
+
+
+	systemctl restart mariadb
+
+  2) 클러스터 구성 실행(3대 중 1대만 먼저 설정)
+	galera_new_cluster
+
+  3) 설정 변경(3대 중 1대만 먼저 설정)
+	vi /etc/mysql/mariadb.conf.d/50-server.cnf
+		wsrep_cluster_address="gcomm://10.10.10.101,10.10.10.102,10.10.10.103"(3대의 아이피주소)
+
+  4) 서버 시작(3대 중 1대만 먼저 설정)
+	systemctl restart mariadb
+
+
+  5) 나머지 서버 설정
+	systemctl stop mariadb
+
+	vi /etc/mysql/mariadb.conf.d/50-server.cnf
+	마지막 줄에 다음 내용 추가
+[galera]
+wsrep_on=ON
+wsrep_provider=/usr/lib/galera/libgalera_smm.so
+wsrep_cluster_address="gcomm://10.10.10.101,10.10.10.102,10.10.10.103"
+binlog_format=row
+default_storage_engine=InnoDB
+innodb_autoinc_lock_mode=2
+bind-address=0.0.0.0
+wsrep_cluster_name="MariaDB_Cluster"	# 3대의 컴퓨터를 묶었을 때 내가 지어줄 이름
+wsrep_node_address="10.10.10.102"	# 현재 컴퓨터의 IP 주소
+
+
+	systemctl restart mariadb
+
+  6) 최종 확인
+	show status like 'wsrep_cluster_status';
+		모든 노드에서 Primary
+	
+	show status like 'wsrep_cluster_size';
+		모든 노드에서 클러스터의 총 노드 수(3)
+
+	show status like 'wsrep_local_state_comment';
+		모든 노드에서 Synced
+
+
+
+한대에서만 클래스터 생성한다 적고
+나머지는 그냥 추가
+여러번 적으면 안됨
+
+하고 서버 재시작
+클러스터의 상태
+프라이머리면 클라스터 상태는 잘 돌아가고 있는 상태
+몇대가 클러스터에 들어가있는지 확인
+
+

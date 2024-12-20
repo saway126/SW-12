@@ -1,0 +1,60 @@
+﻿1. 워드프레스 서버
+  1) 필요한 프로그램 설치
+	apt update
+	apt install -y php-imagick php8.1-fpm php8.1-mbstring php8.1-bcmath php8.1-xml php8.1-mysql php8.1-common php8.1-gd php8.1-cli php8.1-curl php8.1-zip
+	systemctl restart php8.1-fpm
+
+  2) 웹 서버 설정
+	vi /etc/nginx/sites-enabled/default
+		41번 라인을 다음처럼 수정
+		root /var/www/html/wordpress;
+
+		44번 라인을 다음처럼 수정
+		index index.php index.html index.htm index.nginx-debian.html;
+
+		location / { } 을 다음처럼 변경
+			location / {
+		    	try_files $uri $uri/ /index.php?$args;
+			}
+
+		그 밑에 다음 추가
+		    location ~ \.php$ {
+		        include snippets/fastcgi-php.conf;
+		        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+		    }
+
+  3) 워드프레스 다운 및 설치
+	다운로드
+	wget https://wordpress.org/latest.tar.gz	
+	
+	압축 해제
+	tar zxvf latest.tar.gz
+
+	폴더 옮기기
+	mv wordpress /var/www/html/
+
+	권한 설정
+	chown -R www-data:www-data /var/www/html
+
+  4) 웹 서버 실행
+	systemctl restart nginx
+
+  5) 웹 브라우저로 접속
+	http://서버IP/
+
+  6) 워드프레스 설정
+	한국어 -> 시작합니다! -> DB 이름, IP, ID, PW 설정 -> 설치 진행 -> 워드 프레스 설치 
+
+
+
+
+
+
+
+
+
+
+
+
+2. DB 서버
+	원래 쓰던거 쓰던가 새로 만들던가

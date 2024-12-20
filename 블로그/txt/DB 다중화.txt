@@ -1,0 +1,52 @@
+﻿
+
+	가상 머신						cpu	ram
+		1대 : haproxy 설치			1	1
+		2대 : mariadb-server 설치 및 실행	1	1
+
+01. mariadb 여러대 설정할 때 문제점
+  1) mariadb 바인드 주소 설정
+	vi /etc/mysql/mariadb.conf.d/50-server.cnf
+		27번 라인에 있는 설정을 다음처럼 변경
+		bind-address            = 0.0.0.0
+
+  2) mariadb 실행
+	systemctl restart mariadb
+
+  3) mariadb 실행 확인
+	systemctl status mariadb
+	apt install -y net-tools
+	netstat -anlp | grep :3306	
+
+  4) DB 서버 초기화
+	 mysql_secure_installation
+		엔터
+		엔터
+		엔터
+		qwer1234
+		qwer1234
+		엔터
+		엔터
+		엔터
+		엔터
+
+  5) 데이터 베이스 생성
+	mariadb -u root -p		클라이언트 프로그램을 실행하는 것
+		qwer1234
+
+	CREATE DATABASE kks;
+
+	exit
+
+  6) 원격 접속용 사용자 추가
+	mariadb -u root -p
+
+	CREATE USER 'kks'@'%' IDENTIFIED BY 'qwer1234';
+
+	GRANT ALL PRIVILEGES ON kks.* TO 'kks'@'%';
+
+	FLUSH PRIVILEGES;
+	
+
+
+

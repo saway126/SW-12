@@ -1,0 +1,6 @@
+tomcat3: 192.168.111.136		아이피 설정 완료	자바 설치	디비설치						o			o		x
+(아이피 세팅 후 netplan apply)	
+tomcat2: 192.168.111.135			c			c		c
+(아이피 세팅 후 netplan apply)
+tomcat1: 192.168.111.134			c			c		c
+(아이피 세팅 후 netplan apply)

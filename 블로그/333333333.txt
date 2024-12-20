@@ -1,0 +1,42 @@
+import java.util.*;
+class Solution {
+    class Pair {
+        public int first;
+        public int second;
+        public Pair(int first, int second) {
+            this.first = first;
+            this.second = second;
+        }
+    }
+    public int solution(int bridge_length, int weight, int[] truck_weights) {
+        int answer = 0;
+        //다리
+        Queue<Pair> qi = new LinkedList<>();
+        int now_length = 0;
+        int now_weight = 0;
+        int size = 0;
+        int cnt =0;
+        while(truck_weights.length > size || !qi.isEmpty()) {
+            if(!qi.isEmpty()) {
+                if(cnt - qi.peek().second == bridge_length) {
+                    now_length--;
+                    now_weight -= qi.peek().first;
+                    qi.remove();
+                }
+            }
+            
+            if(truck_weights.length > size) {
+                if( now_length < bridge_length && (now_weight + truck_weights[size]) <= weight) {
+                    Pair p = new Pair(truck_weights[size], cnt);
+                    now_length++;
+                    now_weight += p.first;
+                    size++;
+                    qi.add(p);
+                }
+            }
+            cnt++;            
+        }
+        answer = cnt;
+        return answer;
+    }
+}
